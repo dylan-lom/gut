@@ -19,7 +19,6 @@ amend() {
         || git commit --amend -a
 }
 
-alias co='checkout'
 checkout() {
     truthy "$1" && target="$1" || target="$(git config init.defaultBranch)"
     git checkout "$target"
@@ -39,7 +38,6 @@ root() {
     git rev-parse --show-toplevel
 }
 
-alias save='stash'
 stash() {
     truthy "$1" \
         && git stash push -m "$1" \
@@ -74,6 +72,25 @@ todo() {
 
 whoami() {
     echo "$(git config user.name) ($(git config user.email))"
+}
+
+www() {
+    branch="$(git rev-parse --abbrev-ref HEAD)"
+    defaultBranch="$(git config init.defaultBranch)"
+    remote="$(git config branch."$branch".remote || git config branch."$defaultBranch".remote || git config branch.main.remote || git config branch.master.remote)"
+    if [ -z "$remote" ]; then
+        echo "ERROR: Couldn't guess what host to use: current branch doesn't have a remote and default ($defaultBranch) doesn't either" > /dev/stderr
+        exit 1
+    fi
+    url="$(git remote get-url "$remote")"
+    http="$(echo "$url" | sed 's/git@\([^:]*\):\(.*\)/https:\/\/\1\/\2/')"
+
+    # format git@host:repo/path
+    if [ "$1" = '-p' ]; then
+        echo "$http"
+    else
+        x-www-browser "$http"
+    fi
 }
 
 $@

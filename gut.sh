@@ -49,6 +49,7 @@ status() {
 }
 
 todo() {
+    # FIXME: Use getopts
     while [ "$#" -gt 0 ]; do
         case "$1" in
             "-c") colorize=true ;;
@@ -62,7 +63,7 @@ todo() {
     re="(TODO$(truthy $fixme && echo '|FIXME')):"
     color="--color=$(truthy $colorize && echo 'always' || echo 'never')"
     if truthy $summary; then
-        git grep -ncE $@ '(TODO|FIXME):'
+        git grep -ncE $@ "$re"
     else
         # TODO: Setting color=always breaks alignment for some reason
         git grep -nE "$color" $@ "$re" | \

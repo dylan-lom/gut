@@ -25,13 +25,22 @@ checkout() {
 }
 
 
-# If anything already added (staged):
-#    then commit that
-#    else prompt user to stage then commit
+# 1. If filenames provided as arguments, stages those files and commit
+# 2. If anything is already staged, commit that (regular git behavior)
+# 3. If there are unstaged changes, commit those
+# 4. If there are no unstaged changes, but are untracked files interactively add
 commit() {
-    git status --porcelain | grep -q '^[^ ]*A' \
-        && git commit \
-        || (status; add; git commit)
+    if [ ! -z "$@" ]; then
+        git add $@
+    elif git status --porcelain | grep -q '^[AMDRC]'; then
+        true # nothing to do, everything is already staged
+    elif git status --porcelain | grep -q '^.[MDRC]'; then
+        git add -u # add tracked files
+    else
+        add
+    fi
+
+    git commit
 }
 
 root() {

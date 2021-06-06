@@ -24,6 +24,39 @@ checkout() {
     git checkout "$target"
 }
 
+# Clone repo into $host/$path/$to/$repo, taking into account PWD
+# eg. clone git@github.com:dylan-lom/gut.git => ./github.com/dylan-lom/gut
+#     if $PWD=~/src/github.com               => ./dylan-lom/gut
+clone() {
+    if [ -z "$1" ]; then
+        echo 'ERROR: Please provide repo to clone...' > /dev/stderr
+        exit 1
+    fi
+    repo="$1"
+
+    # TODO (#7): Support non-ssh transports
+    name="$(echo $repo | sed 's/git@\([^:]*\):\(.*\)/\1\/\2/' | sed 's/\.git$//')"
+
+    dest="" # where we need to clone to
+    while (echo "$PWD" | grep -qv "$name\$"); do
+
+        # Handle the case where none of $name occurs in PWD and we exhaust
+        # all '/' characters in $name
+        # FIXME: I feel like this doesn't need to be its own case...
+        if (echo "$name" | grep -qv '/'); then
+            dest="$name/$dest"
+            name=""
+            break
+        fi
+
+        dest="$(echo $name | rev | cut -d '/' -f1 | rev)/$dest"
+        name="$(echo $name | rev | cut -d '/' -f2- | rev)"
+
+    done
+
+    git clone "$repo" "$dest"
+}
+
 
 # 1. If filenames provided as arguments, stages those files and commit
 # 2. If anything is already staged, commit that (regular git behavior)

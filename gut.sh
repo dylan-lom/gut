@@ -91,7 +91,7 @@ commit() {
 push() {
     if [ ! -z "$1" ]; then
         git push $@
-    elif thisRemote; then
+    elif thisRemote > /dev/null 2>&1; then
         git push
     else
         confirm "No upstream; use $(guessRemote)?" \

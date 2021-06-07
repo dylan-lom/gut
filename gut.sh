@@ -3,6 +3,15 @@
 # gut: git but gross
 # author: Dylan Lom <djl@dylanlom.com>
 
+thisBranch() { git rev-parse --abbrev-ref HEAD; }
+thisRemote() { git config branch."$(thisBranch)".remote; }
+defaultBranch() { git config init.defaultBranch; }
+defaultRemote() { git config branch."$(defaultBranch)".remote; }
+
+guessRemote() {
+    thisRemote || defaultRemote || git config branch.main.remote || git config branch.master.remote
+}
+
 add() {
     truthy "$1" \
         && git add $1 \
@@ -76,6 +85,21 @@ commit() {
     git commit
 }
 
+# 1. If any arguments given, use those
+# 2. If branch already has a remote, push to that
+# 3. Try to guess remote and push to that
+push() {
+    if [ ! -z "$1" ]; then
+        git push $@
+    elif thisRemote; then
+        git push
+    else
+        confirm "No upstream; use $(guessRemote)?" \
+            && git push -u "$(guessRemote)" "$(thisBranch)" \
+            || echo "ABORT: Push cancelled; no remote" >/dev/stderr
+    fi
+}
+
 root() {
     git rev-parse --show-toplevel
 }
@@ -118,11 +142,9 @@ whoami() {
 }
 
 www() {
-    branch="$(git rev-parse --abbrev-ref HEAD)"
-    defaultBranch="$(git config init.defaultBranch)"
-    remote="$(git config branch."$branch".remote || git config branch."$defaultBranch".remote || git config branch.main.remote || git config branch.master.remote)"
+    remote="$(guessRemote)"
     if [ -z "$remote" ]; then
-        echo "ERROR: Couldn't guess what host to use: current branch doesn't have a remote and default ($defaultBranch) doesn't either" > /dev/stderr
+        echo "ERROR: Couldn't guess what remote to use..." > /dev/stderr
         exit 1
     fi
     url="$(git remote get-url "$remote")"

@@ -188,7 +188,7 @@ www() {
 
 argv0="$0"
 
-if echo "$gut_commands" | egrep -qv " $1 "; then
+if echo "$gut_commands" | grep -qv " $1 "; then
     echo "ERROR: Unknown command \`"$1"\`" > /dev/stderr
     exit 1
 fi

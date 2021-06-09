@@ -3,6 +3,12 @@
 # gut: git but gross
 # author: Dylan Lom <djl@dylanlom.com>
 
+# TODO: Review commands
+# FIXME: I don't like that we need leading and trailing ` ` here, but it was
+#        the simplest way to avoid matching substrings of commands (eg. `out`)
+#        without involving egrep (breaking POSIX even more...)
+gut_commands=" add amend checkout clone commit push root stash status todo whoami www "
+
 thisBranch() { git rev-parse --abbrev-ref HEAD; }
 thisRemote() { git config branch."$(thisBranch)".remote; }
 defaultBranch() { git config init.defaultBranch; }
@@ -157,5 +163,10 @@ www() {
         x-www-browser "$http"
     fi
 }
+
+if echo "$gut_commands" | egrep -qv " $1 "; then
+    echo "ERROR: Unknown command \`"$1"\`" > /dev/stderr
+    exit 1
+fi
 
 $@

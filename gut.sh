@@ -139,11 +139,13 @@ stash() {
 }
 
 status() {
-    comparison_branch="$(defaultBranch)"
+    comparisonBranch="$(defaultBranch)"
     # Current branch has remote
-    thisRemote > /dev/null && comparison_branch="$(thisRemote)/$(thisBranch)"
-    changes="$(git rev-list "$comparison_branch.." --count)"
-    test "$changes" -gt 0 && echo "Ahead of $comparison_branch by $changes commits"
+    thisRemote > /dev/null && comparisonBranch="$(thisRemote)/$(thisBranch)"
+    aheadCount="$(git rev-list "$comparisonBranch.." --count)"
+    behindCount="$(git rev-list "..$comparisonBranch" --count)"
+    test "$aheadCount" -gt 0 && echo "Ahead $comparisonBranch by $aheadCount commits"
+    test "$behindCount" -gt 0 && echo "Behind $comparisonBranch by $behindCount commits"
 
     git status --short
 }

@@ -7,15 +7,37 @@
 # FIXME: I don't like that we need leading and trailing ` ` here, but it was
 #        the simplest way to avoid matching substrings of commands (eg. `out`)
 #        without involving egrep (breaking POSIX even more...)
-gut_commands=" add amend checkout clone commit push root stash status todo whoami www "
+gut_commands=" add amend checkout clone commit push root stash status todo whoami www gutInstall "
 
 thisBranch() { git rev-parse --abbrev-ref HEAD; }
 thisRemote() { git config branch."$(thisBranch)".remote; }
 defaultBranch() { git config init.defaultBranch; }
 defaultRemote() { git config branch."$(defaultBranch)".remote; }
-
 guessRemote() {
     thisRemote || defaultRemote || git config branch.main.remote || git config branch.master.remote
+}
+
+gutInstall() {
+    dest=""
+    if [ ! -z "$1" ]; then
+        dest="$1"
+    else
+        msg="Where do you want to install to?
+    1: ~/bin (default)
+    2: /usr/local/bin
+    3: ~/.local/bin
+    4: CANCEL
+"
+        confirm "$msg" 1 2 3 4
+        case "$?" in
+            0) dest="$HOME/bin/gut" ;;
+            1) dest="/usr/local/bin/gut" ;;
+            2) dest="$HOME/.local/bin/gut" ;;
+            3) return ;;
+        esac
+    fi
+
+    cp "$argv0" $dest
 }
 
 add() {
@@ -163,6 +185,8 @@ www() {
         x-www-browser "$http"
     fi
 }
+
+argv0="$0"
 
 if echo "$gut_commands" | egrep -qv " $1 "; then
     echo "ERROR: Unknown command \`"$1"\`" > /dev/stderr

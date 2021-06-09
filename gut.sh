@@ -40,14 +40,7 @@ install() {
 }
 
 # COMMANDS
-gut_commands=" add amend checkout clone commit guts push root stash status todo whoami www "
-
-# Used for debugging purposes -- exposes internal functions (guts).
-# Also to expose the install command a level deeper because I felt gross having
-# it as a top-level command.
-guts() {
-    $@
-}
+gut_commands=" add amend checkout clone commit git guts push root stash status todo whoami www "
 
 add() {
     truthy "$1" \
@@ -121,6 +114,17 @@ commit() {
 
     git commit
 }
+
+# git -- literally just invoke git command
+
+# Used for debugging purposes -- exposes internal functions (guts).
+# Also to expose the install command a level deeper because I felt gross having
+# it as a top-level command.
+guts() {
+    $@
+}
+
+
 
 # 1. If any arguments given, use those
 # 2. If branch already has a remote, push to that

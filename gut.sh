@@ -3,10 +3,6 @@
 # gut: git but gross
 # author: Dylan Lom <djl@dylanlom.com>
 
-# TODO: Review commands
-# FIXME: I don't like that we need leading and trailing ` ` here, but it was
-#        the simplest way to avoid matching substrings of commands (eg. `out`)
-#        without involving egrep (breaking POSIX even more...)
 
 thisBranch() { git rev-parse --abbrev-ref HEAD; }
 thisRemote() { git config branch."$(thisBranch)".remote; }
@@ -39,6 +35,7 @@ install() {
     cp "$argv0" $dest
 }
 
+# TODO: Review commands
 # COMMANDS
 gut_commands=" add amend checkout clone commit git guts push root stash status todo whoami www "
 

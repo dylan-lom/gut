@@ -7,7 +7,6 @@
 # FIXME: I don't like that we need leading and trailing ` ` here, but it was
 #        the simplest way to avoid matching substrings of commands (eg. `out`)
 #        without involving egrep (breaking POSIX even more...)
-gut_commands=" add amend checkout clone commit push root stash status todo whoami www gutInstall "
 
 thisBranch() { git rev-parse --abbrev-ref HEAD; }
 thisRemote() { git config branch."$(thisBranch)".remote; }
@@ -17,7 +16,7 @@ guessRemote() {
     thisRemote || defaultRemote || git config branch.main.remote || git config branch.master.remote
 }
 
-gutInstall() {
+install() {
     dest=""
     if [ ! -z "$1" ]; then
         dest="$1"
@@ -38,6 +37,16 @@ gutInstall() {
     fi
 
     cp "$argv0" $dest
+}
+
+# COMMANDS
+gut_commands=" add amend checkout clone commit guts push root stash status todo whoami www "
+
+# Used for debugging purposes -- exposes internal functions (guts).
+# Also to expose the install command a level deeper because I felt gross having
+# it as a top-level command.
+guts() {
+    $@
 }
 
 add() {

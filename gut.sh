@@ -37,7 +37,7 @@ install() {
 
 # TODO: Review commands
 # COMMANDS
-gut_commands=" add amend checkout clone commit git guts push root stash status todo whoami www "
+gut_commands=" add amend checkout clone commit git guts log push root stash status todo whoami www "
 
 add() {
     truthy "$1" \
@@ -121,7 +121,9 @@ guts() {
     $@
 }
 
-
+log() {
+    git log --pretty=oneline --abbrev-commit
+}
 
 # 1. If any arguments given, use those
 # 2. If branch already has a remote, push to that

@@ -3,7 +3,7 @@
 # gut: git but gross
 # author: Dylan Lom <djl@dylanlom.com>
 
-
+# interals / "guts"
 thisBranch() { git rev-parse --abbrev-ref HEAD; }
 thisRemote() { git config branch."$(thisBranch)".remote; }
 defaultBranch() { git config init.defaultBranch; }
@@ -33,6 +33,26 @@ install() {
     fi
 
     cp "$argv0" $dest
+}
+
+# TODO: Actually follow the spec & all transports as per git-clone(1)
+repoToPath() {
+    repo="$1"
+    if (echo "$repo" | grep -q 'ssh:\/\/'); then
+        host="$(echo "$repo" | sed 's/ssh:\/\/[a-zA-Z]*@\([^:]*\):.*/\1/')"
+        path="$(echo "$repo" | sed 's/ssh:\/\/[^:]*:\(.*\)/\1/' | sed 's/^\///' | sed s'/\.git$//')"
+    elif (echo "$repo" | grep -q 'https\?:\/\/'); then
+        host="$(echo "$repo" | sed 's/https\?:\/\/\([^/]*\)\/.*/\1/')"
+        path="$(echo "$repo" | sed 's/https\?:\/\/[^/]*\/\(.*\)/\1/')"
+    elif (echo "$repo" | grep -q 'git:\/\/'); then
+        host="$(echo "$repo" | sed 's/git:\/\/\([^/:]*\).*/\1/')"
+        path="$(echo "$repo" | sed 's/git:\/\/[^/:]*[^/]*\/\(.*\)/\1/')"
+    else
+        echo "ERROR: Unrecognised transport to repo $repo" > /dev/stderr
+        exit 1
+    fi
+
+    echo "$host/$path"
 }
 
 # TODO: Review commands
@@ -68,25 +88,23 @@ clone() {
         echo 'ERROR: Please provide repo to clone...' > /dev/stderr
         exit 1
     fi
+
     repo="$1"
-
-    # TODO (#7): Support non-ssh transports
-    name="$(echo $repo | sed 's/git@\([^:]*\):\(.*\)/\1\/\2/' | sed 's/\.git$//')"
-
+    path="$(repoToPath "$repo")"
     dest="" # where we need to clone to
-    while (echo "$PWD" | grep -qv "$name\$"); do
+    while (echo "$PWD" | grep -qv "$path\$"); do
 
-        # Handle the case where none of $name occurs in PWD and we exhaust
-        # all '/' characters in $name
+        # Handle the case where none of $path occurs in PWD and we exhaust
+        # all '/' characters in $path
         # FIXME: I feel like this doesn't need to be its own case...
-        if (echo "$name" | grep -qv '/'); then
-            dest="$name/$dest"
-            name=""
+        if (echo "$path" | grep -qv '/'); then
+            dest="$path/$dest"
+            path=""
             break
         fi
 
-        dest="$(echo $name | rev | cut -d '/' -f1 | rev)/$dest"
-        name="$(echo $name | rev | cut -d '/' -f2- | rev)"
+        dest="$(echo $path | rev | cut -d '/' -f1 | rev)/$dest"
+        path="$(echo $path | rev | cut -d '/' -f2- | rev)"
 
     done
 

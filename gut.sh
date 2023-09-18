@@ -3,7 +3,10 @@
 # gut: git but gross
 # author: Dylan Lom <djl@dylanlom.com>
 
+VERSION=0.0.2
+
 # interals / "guts"
+version() { echo "$VERSION"; }
 thisBranch() { git rev-parse --abbrev-ref HEAD; }
 thisRemote() { git config branch."$(thisBranch)".remote; }
 defaultBranch() { git config init.defaultBranch; }

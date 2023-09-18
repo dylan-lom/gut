@@ -59,6 +59,13 @@ repoToPath() {
 # COMMANDS
 gut_commands=" add amend checkout clone commit git guts log push root stash status todo whoami www "
 
+# Expose internal functions (the guts).
+# Also to expose the install command a level deeper because I felt gross having
+# it as a top-level command.
+guts() {
+    $@
+}
+
 add() {
     truthy "$1" \
         && git add $1 \
@@ -70,7 +77,8 @@ add() {
 #    then amend that
 #    else amend all
 amend() {
-    git status --porcelain | grep -q '^[^ ]*A' \
+    test "$#" -gt 0 && git add $@
+    git status --porcelain | grep -q '^[^ ]' \
         && git commit --amend \
         || git commit --amend -a
 }
@@ -130,14 +138,6 @@ commit() {
     git commit
 }
 
-# git -- literally just invoke git command
-
-# Used for debugging purposes -- exposes internal functions (guts).
-# Also to expose the install command a level deeper because I felt gross having
-# it as a top-level command.
-guts() {
-    $@
-}
 
 log() {
     git log --pretty=oneline --abbrev-commit
@@ -174,7 +174,7 @@ status() {
     thisRemote > /dev/null && comparisonBranch="$(thisRemote)/$(thisBranch)"
     aheadCount="$(git rev-list "$comparisonBranch.." --count)"
     behindCount="$(git rev-list "..$comparisonBranch" --count)"
-    test "$aheadCount" -gt 0 && echo "Ahead $comparisonBranch by $aheadCount commits"
+    test "$aheadCount" -gt 0 && echo "Ahead of $comparisonBranch by $aheadCount commits"
     test "$behindCount" -gt 0 && echo "Behind $comparisonBranch by $behindCount commits"
 
     git status --short

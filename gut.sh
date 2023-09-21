@@ -128,7 +128,7 @@ clone() {
 # 3. If there are unstaged changes, commit those
 # 4. If there are no unstaged changes, but are untracked files interactively add
 commit() {
-    if [ ! -z "$@" ]; then
+    if [ "$#" -gt 0 ]; then
         git add $@
     elif git status --porcelain | grep -q '^[AMDRC]'; then
         true # nothing to do, everything is already staged

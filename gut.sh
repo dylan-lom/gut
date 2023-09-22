@@ -35,7 +35,7 @@ install() {
         esac
     fi
 
-    cp "$argv0" $dest
+    cp "$argv0" "$dest"
 }
 
 # TODO: Actually follow the spec & all transports as per git-clone(1)

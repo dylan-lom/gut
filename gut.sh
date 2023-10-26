@@ -230,8 +230,7 @@ www() {
 argv0="$0"
 
 if echo "$gut_commands" | grep -qv " $1 "; then
-    echo "ERROR: Unknown command \`"$1"\`" > /dev/stderr
-    exit 1
+	git "$@"
+else
+	$@
 fi
-
-$@
